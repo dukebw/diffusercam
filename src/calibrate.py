@@ -21,5 +21,8 @@ def preview(output_path):
         camera.capture(output_path)
 
 
+calibrate.add_command(preview)
+
+
 if __name__ == "__main__":
     calibrate()
