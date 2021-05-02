@@ -3,6 +3,7 @@ import time
 
 import click
 from picamera import PiCamera
+from PIL import Image
 
 
 @click.group()
@@ -19,6 +20,8 @@ def preview(output_path):
     while True:
         time.sleep(2)
         camera.capture(output_path)
+        img = Image.open(output_path)
+        img.show()
 
 
 calibrate.add_command(preview)
