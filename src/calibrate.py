@@ -1,4 +1,5 @@
 import os
+import psutil
 import time
 
 import click
@@ -19,6 +20,10 @@ def preview(output_path):
     camera.start_preview()
     while True:
         time.sleep(2)
+        for proc in psutil.process_iter():
+            if proc.name() == "display":
+                proc.kill()
+
         camera.capture(output_path)
         img = Image.open(output_path)
         img.show()
