@@ -61,6 +61,25 @@
 
 \maketitle
 
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+\begin{itemize}
+	\item
+\end{itemize}
+
+
+\section{Method}
+
+\begin{itemize}
+	\item Description of gradient descent with FISTA\@.
+
+	\item Description of ADMM\@.
+\end{itemize}
+
+
 \section{Experimental Setup}
 
 I converted a PiCam V2 to build my DiffuserCam.
@@ -71,8 +90,9 @@ This is because the 2mm focal length of my diffuser,
 double-sided tape, was smaller than the thickness of the camera housing itself.
 I instead used cardboard as a separating material to place the diffuser at the
 correct 2mm focal length from the sensor.
+
 I determined the focal length by analyzing the full width at half maximum
-(FWHM)
+(FWHM) of the autorcorrelation of the recorded point spread function (PSF).
 
 I used a cement mixing tray (Fig.~\ref{fig:experimental-setup}) to provide
 a dark environment for calibrating the DiffuserCam.
@@ -83,8 +103,8 @@ I created a pinhole aperture out of cardboard and placed it in front of the LED
 to make the LED more closely resemble a point source.
 With the tray covered, I read images from the camera in real time.
 I adjusted the voltage applied to the LED so that the image pixels did not
-saturate, which would violate the linearity assumption made about the point
-spread function (PSF) in the reconstruction optimization.
+saturate, which would violate the linearity assumption made about the PSF in
+the reconstruction optimization.
 I used the same experimental setup for taking photos of objects to reconstruct.
 When reconstructing objects displayed on my phone I adjusted the PiCam exposure
 time in order to prevent pixel saturation.
@@ -112,6 +132,31 @@ time in order to prevent pixel saturation.
 
 \section{Results}
 
+\begin{itemize}
+	\item Autocorrelation of PSF at multiple spacings.
+
+	\item I recorded caustics on the sensor by applying 2.5V to the LED and capturing an image for the default exposure time (Fig.~\ref{fig:caustic}).
+
+	\item I recorded an image under the same conditions but this time with
+	      an aperture made of black tape on top of the diffuser
+	      (Fig.~\ref{fig:caustic-with-aperture}).
+
+	\item I ran gradient descent (GD) reconstruction of a spiral image displayed
+	      on my cell phone
+	      (Fig.~\ref{fig:gd-spiral-reconstruction-500iters}).
+	      I initialized the GD reconstruction with the raw sensor data
+	      (Fig.~\ref{fig:raw-data-spiral}).
+	      The reconstruction ran for~\num{500} iterations.
+	      The update step uses FISTA~\cite{beck2009fast} and a
+	      non-negativity projection.
+	      GD reconstructed the spiral image clearly after about 200 epochs.
+
+	\item Blurb about ADMM reconstruction.
+
+	\item Plot reconstruction error over iterations for both GD and ADMM\@.
+
+	\item Reconstructions of illuminated object.
+\end{itemize}
 
 
 \begin{figure}[t]
@@ -138,6 +183,14 @@ time in order to prevent pixel saturation.
 \end{figure}
 
 
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/raw-data-spiral}
+	\caption{\label{fig:raw-data-spiral}Raw data of the spiral cell phone
+		image prior to reconstrution.}
+\end{figure}
+
+
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=1.0\linewidth]{images/gd-spiral-reconstruction-500iters}
@@ -152,10 +205,22 @@ time in order to prevent pixel saturation.
 \end{figure*}
 
 
+\section{Discussion}
 
+\begin{itemize}
+	\item Discussion / analysis about why ADMM produced artifacts and GD
+	      did not
 
+	\item Which of ADMM / GD had a lower reconstruction error after
+	      convergence?
+	      What is the trend?
+	      E.g., does GD converge but ADMM diverges?
+	      Why?
 
+	\item Analyze the focal distance of the diffuser.
 
+	\item Analyze the linearity and shift invariance of the system.
+\end{itemize}
 
 
 
