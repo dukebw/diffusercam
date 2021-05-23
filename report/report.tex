@@ -76,7 +76,8 @@
 \begin{itemize}
 	\item Description of gradient descent with FISTA\@.
 
-	\item Description of ADMM\@.
+	\item Description of Alternating Direction Method of Multipliers
+	      (ADMM).
 \end{itemize}
 
 
@@ -151,7 +152,17 @@ time in order to prevent pixel saturation.
 	      non-negativity projection.
 	      GD reconstructed the spiral image clearly after about 200 epochs.
 
-	\item Blurb about ADMM reconstruction.
+	\item I ran ADMM reconstruction of the same spiral image on my cell phone
+	      (Fig.~\ref{fig:admm-spiral-reconstruction-5iters}).
+	      ADMM reconstructed the spiral clearly after only one iteration,
+	      starting from the raw sensor data.
+	      Successive iterations sharpened the spiral image.
+	      However, a regular pattern of artifacts in the image outside the
+	      spiral became increasingly apparent.
+	      These artifacts appeared in the ADMM reconstruction although at a
+	      similarly converged point the GD recsontruction
+	      (Fig.~\ref{fig:gd-spiral-reconstruction-500iters}) did not show
+	      similar artifacts.
 
 	\item Plot reconstruction error over iterations for both GD and ADMM\@.
 
@@ -203,6 +214,20 @@ time in order to prevent pixel saturation.
 		The bar on the right side of the spiral is an occlusion from a
 		stand holding up the cell phone.}
 \end{figure*}
+
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/admm-spiral-reconstruction-5iters}
+	\caption{\label{fig:admm-spiral-reconstruction-5iters}
+		ADMM reconstruction of a spiral image
+		displayed on a cell phone in an otherwise dark environment.
+		ADMM reconstructs the spiral image clearly after only a single
+		iteration.
+		The bar on the right side of the spiral is an occlusion from a
+		stand holding up the cell phone.}
+\end{figure*}
+
 
 
 \section{Discussion}
