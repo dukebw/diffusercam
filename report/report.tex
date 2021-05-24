@@ -258,7 +258,7 @@ time in order to prevent pixel saturation.
 		Caustics produced by applying~\num{2.5}V to the LED\@.
 		Here an aperture made from black tape creates a black border
 		around the caustic pattern.
-		Without the aperture single-shot calibration would not be
+		Without the aperture, single-shot calibration would not be
 		possible, because new caustics would come into view when the
 		point source moves.}
 \end{figure}
@@ -312,7 +312,57 @@ time in order to prevent pixel saturation.
 	      E.g., does GD converge but ADMM diverges?
 	      Why?
 
-	\item Analyze the focal distance of the diffuser.
+	\item It was important to analyze the magnification and field of view of
+	      the diffuser.
+	      Due to the reconstruction step between recording sensor data and
+	      viewing an image, it was helpful to find these properties
+	      analytically in order to choose appropriate object size and
+	      distances to fill the field of view.
+	      As with conventional lenses the diffuser's focus distance
+	      constitutes a tradeoff between magnification and field of view.
+	      The diffuser with a sensor placed distance~$d_i$ from the diffuser
+	      magnifies an object placed distance~$d_o$ from the diffuser by
+	      magnification~$m = -d_i/d_o$.
+	      The size of the cement mixing tray
+	      (Fig.~\ref{fig:experimental-setup}) limited the object
+	      distance~$d_o$ to a maximum of about~\num{20}cm.
+	      Based on qualitative and quantitative
+	      (Figs.~\ref{fig:autocorrelation-cross-section-y-axis-2mm-spacing}
+	      \& \ref{fig:autocorrelation-cross-section-x-axis-2mm-spacing})
+	      observation I used a~\num{2}mm thick cardboard separating
+	      material so that the sensor distance~$d_i$ to the diffuser
+	      was~\num{0.2}cm.
+	      Hence the magnification of the DiffuserCam
+	      was
+	      \begin{equation}
+		      m = -d_i/d_o = -0.01\times,
+	      \end{equation}
+	      where the negative sign indicates a vertical flip.
+	      This magnification affects the size of object imaged at a given
+	      focus distance, since the sensor image area is limited
+	      to~\num{3.68}mm~$\times$~\num{2.76}mm.
+	      Rearranging the magnification in terms of the true object
+	      height~$y_o$ and object image height~$y_i$ gives the maximum
+	      object height's dependence on magnification, i.e.,
+	      \begin{equation}
+		      m = -d_i/d_o = -y_i/y_o \implies y_o = -\frac{y_i d_o}{d_i}.
+		      \label{eqn:object-height-magnification}
+	      \end{equation}
+	      Substituting in the known sensor distance~$d_i$, maximum object
+	      distance~$d_o$ (determined by the mixing tray's size), and sensor
+	      height~$y_i$ gives the maximum object height as
+	      \begin{equation}
+		      y_o = -\frac{y_i d_o}{d_i}
+		      = \frac{0.368\mathrm{cm}\times20\mathrm{cm}}{0.2\mathrm{cm}}
+		      = 36.8\mathrm{cm}.
+	      \end{equation}
+	      In practice this maximum object height was reduced slightly due
+	      to the aperture, but served as a rough guideline for the size of
+	      object to image in order to fill the field of view.
+	      The field of view of the capture setup was large due to the
+	      short~\num{2}mm focal length of the diffuser.
+	      Increasing to a~\num{4}mm focal length would mean that the camera
+	      could only image an~\num{18.4}cm tall object at the same distance.
 
 	\item Analyze the linearity and shift invariance of the system.
 \end{itemize}
