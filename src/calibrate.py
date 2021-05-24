@@ -3,6 +3,7 @@ import psutil
 import time
 
 import click
+import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn.functional as F
 
@@ -12,6 +13,14 @@ except ModuleNotFoundError:
     print("No picamera")
 from PIL import Image
 from scipy.signal import fftconvolve
+
+
+def _plot_autocorrelation_cross_section(autocorr_cross_section, axis):
+    plt.title(f"Autocorrelation Cross Section ({axis} axis)")
+    plt.ylabel("Normalized Autocorrelation")
+    plt.xlabel(f"{axis} pixel")
+    plt.plot(np.arange(len(autocorr_cross_section)), autocorr_cross_section)
+    plt.show()
 
 
 @click.group()
@@ -32,8 +41,17 @@ def autocorrelate(psf_path, autocorrelation_out_path):
     print(f"Post-normalization: {psf_np.min()}, {psf_np.max()}")
 
     psf_reversed_np = psf_np[::-1, ::-1]
-    psf_autocorr_np = fftconvolve(psf_np, psf_reversed_np, mode="same")
+    psf_autocorr_np = fftconvolve(psf_np, psf_reversed_np, mode="same") / np.prod(
+        psf_np.shape
+    )
     print(f"Autocorrelation {psf_autocorr_np.min()}, {psf_autocorr_np.max()}")
+
+    print(f"psf_autocorr_np {psf_autocorr_np.shape}")
+    autocorr_cross_section = psf_autocorr_np[:, psf_autocorr_np.shape[1] // 2].flatten()
+    _plot_autocorrelation_cross_section(autocorr_cross_section, "y")
+
+    autocorr_cross_section = psf_autocorr_np[psf_autocorr_np.shape[0] // 2].flatten()
+    _plot_autocorrelation_cross_section(autocorr_cross_section, "x")
 
     psf_autocorr_pil = Image.fromarray(
         255.0 * ((psf_autocorr_np - psf_autocorr_np.min()) / psf_autocorr_np.max())

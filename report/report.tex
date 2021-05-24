@@ -134,9 +134,54 @@ time in order to prevent pixel saturation.
 \section{Results}
 
 \begin{itemize}
-	\item Autocorrelation of PSF at multiple spacings.
-
 	\item I recorded caustics on the sensor by applying 2.5V to the LED and capturing an image for the default exposure time (Fig.~\ref{fig:caustic}).
+
+	\item I computed the autocorrelation of the camera setup's PSF
+	      with~\num{2}mm thickness cardboard separating material
+	      (Fig.~\ref{fig:psf-autocorrelation-2mm-spacing}).
+	      I first normalized the PSF~$X\in\mathbb{R}^{H\times W}$ by
+	      subtracting the mean pixel value~$\overline{X}$ and dividing by the standard
+	      deviation~$\sigma$ giving
+	      \begin{equation}
+		      X_{ij} = \frac{X_{ij} - \overline{X}}{\sigma}.
+	      \end{equation}
+	      The resulting autocorrelation
+	      (Fig.~\ref{fig:psf-autocorrelation-2mm-spacing}) resembles a
+	      delta function at the center of the PSF, which indicates the
+	      suitability of the diffuser and focal length.
+	      The autocorrelation of white noise would give a delta function,
+	      and so this resemblance shows that the diffuser has a high degree
+	      of randomness.
+	      For example, if most of the caustic lines in the PSF
+	      (Fig.~\ref{fig:caustic}) were parallel to the~$x$-axis, then the
+	      autocorrelation would be spread out in the~$x$ direction.
+	      Some degree of spread is visible in the autocorrelation image in
+	      the~$x$ direction.
+
+	\item Furthermore, the sharp peak of the autocorrelation at the center
+	      indicates that the diffuser is in focus at this~\num{2}mm
+	      separating distance.
+
+	\item Comparing the autocorrelation cross sections along the~$y$-axis
+	      direction
+	      (Fig.~\ref{fig:autocorrelation-cross-section-y-axis-2mm-spacing})
+	      and the~$x$-axis direction
+	      (Fig.~\ref{fig:autocorrelation-cross-section-x-axis-2mm-spacing})
+	      further substantiates the observation of PSF spread in the~$x$
+	      direction.
+	      The peak in the~$y$-axis direction has a spread of only
+	      about~\num{50} pixels, while the peak in the~$x$-axis direction
+	      has a larger spread of about~\num{150} pixels.
+	      The larger spread in the~$x$ direction is also visible directly
+	      from the autocorrelation image
+	      (Fig~\ref{fig:psf-autocorrelation-2mm-spacing}) as a horizontal
+	      smudge.
+	      The reason for this increased spread in the~$x$ direction is due
+	      to the regularity of the caustic pattern
+	      (Fig.~\ref{fig:caustic}).
+	      A large proportion of caustics are oriented horizontally.
+	      For an evenly distributed autocorrelation spread the caustic
+	      orientations would be uniformly distributed.
 
 	\item I recorded an image under the same conditions but this time with
 	      an aperture made of black tape on top of the diffuser
@@ -168,6 +213,31 @@ time in order to prevent pixel saturation.
 
 	\item Reconstructions of illuminated object.
 \end{itemize}
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/psf-autocorrelation-2mm-spacing}
+	\caption{\label{fig:psf-autocorrelation-2mm-spacing}
+		Autocorrelation of PSF for camera system setup with~\num{2}mm
+		separating material (cardboard).}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/autocorrelation-cross-section-y-axis-2mm-spacing}
+	\caption{\label{fig:autocorrelation-cross-section-y-axis-2mm-spacing}
+		Cross section of autocorrelation along the~$y$ axis direction.}
+\end{figure}
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/autocorrelation-cross-section-x-axis-2mm-spacing}
+	\caption{\label{fig:autocorrelation-cross-section-x-axis-2mm-spacing}
+		Cross section of autocorrelation along the~$x$ axis direction.}
+\end{figure}
 
 
 \begin{figure}[t]
