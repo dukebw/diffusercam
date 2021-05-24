@@ -21,7 +21,8 @@ def calibrate():
 
 @click.command()
 @click.option("--psf-path", type=str, required=True)
-def autocorrelate(psf_path):
+@click.option("--autocorrelation-out-path", type=str, required=True)
+def autocorrelate(psf_path, autocorrelation_out_path):
     psf_pil = Image.open(psf_path)
     psf_np = np.array(psf_pil)
     psf_np = psf_np.sum(axis=2)
@@ -31,12 +32,13 @@ def autocorrelate(psf_path):
     print(f"Post-normalization: {psf_np.min()}, {psf_np.max()}")
 
     psf_reversed_np = psf_np[::-1, ::-1]
-    psf_autocorr = fftconvolve(psf_np, psf_reversed_np, mode="same")
-    print(f"Autocorrelation {psf_autocorr.min()}, {psf_autocorr.max()}")
+    psf_autocorr_np = fftconvolve(psf_np, psf_reversed_np, mode="same")
+    print(f"Autocorrelation {psf_autocorr_np.min()}, {psf_autocorr_np.max()}")
 
-    Image.fromarray(
-        255.0 * ((psf_autocorr - psf_autocorr.min()) / psf_autocorr.max())
-    ).show()
+    psf_autocorr_pil = Image.fromarray(
+        255.0 * ((psf_autocorr_np - psf_autocorr_np.min()) / psf_autocorr_np.max())
+    )
+    psf_autocorr_pil.convert("RGB").save(autocorrelation_out_path)
 
 
 @click.command()
