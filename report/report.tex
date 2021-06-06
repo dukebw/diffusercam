@@ -41,6 +41,8 @@
 	\raisebox{\depth}{$\m@th#1\intercal$}%
 }
 \makeatother
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 % \makeatletter                  % You do not need to write [htpb] all the time
 % \renewcommand\fps@figure{htbp} %
@@ -77,25 +79,140 @@
 
 \section{Method}
 
-% NOTE(brendan): problem setup
-\begin{itemize}
-	\item
-\end{itemize}
+\noindent This project seeks to reconstruct a ``true'' 2D scene from the image
+recorded by a DiffuserCam.
+The reconstruction algorithm begins by defining a forward
+model
+\begin{equation}
+	f : \mathbb{R}^2 \rightarrow \mathbb{R}^2
+	\label{eqn:forward-model}
+\end{equation}
+of image formation~\cite{biscarrat2018diffuseralgo}.
+Suppose the ``true'' 2D scene is an array of light intensity
+values~$V\in\mathbb{R}^{h_v\times w_v}$ sampled from a plane (of height~$h_v$ and
+width~$w_v$) parallel to the camera sensor.
+In this project, 2D scene reconstructions assume that the 2D scene~$V$ is a sum
+of point sources.
+Unlike an imaging setup with a single focal point, DiffuserCam does not map a
+point source in the scene to a point source on the camera sensor.
+Instead, DiffuserCam maps each point source in the scene to a pattern called a
+``caustic image''.
+The 2D reconstruction problem is to start from the image formation model
+\begin{equation}
+	B = f(V),
+	\label{eqn:image-formation}
+\end{equation}
+in which the sensor image data~$B\in\mathbb{R}^{h_c\times w_c}$ is known since
+that is directly captured by the sensor of dimensions~$h_c\times w_c$.
+The 2D scene~$V$ is unknown, so we have to define the forward model~$f$ to find
+the desired reconstruct of~$V$.
 
-% NOTE(brendan): description of gradient descent with FISTA
-In this project I used two optimization methods to reconstruct a 2D scene from
-raw image data captured with DiffuserCam.
+After defining a forward model~$f$ we can solve an inverse problem of the form
+\begin{equation}
+	V = f^{-1}(B)
+	\label{eqn:inverse-problem}
+\end{equation}
+by inverting the image formation model (Eq.~\ref{eqn:image-formation}).
+So that we can calibrate the system with a single measurement we assume
+a specific inductive bias: linear shift invariance.
+This means that the image formation model~$f$ is linear, such that the image
+formed by the weighted sum of light source intensities in the ``true'' 2D
+scene~$V$ is equal to the weighted sum of the images formed by those
+independent light sources.
+Furthermore, we assume that the image formation is shift invariant such that
+a lateral translation of a light source in the scene causes a lateral
+translation of the image formed on the sensor.
+Together the linear and shift invariance assumptions mean that we can define
+image formation via convolution.
+The forward model (Eq.~\ref{eqn:image-formation}) hence becomes a 2D
+convolution
+\begin{equation}
+	f(V) = P * V
+	\label{eqn:forward-model-convolution}
+\end{equation}
+of a point spread function (PSF)~$P\in\mathbb{R}^{h_v\times w_v}$ with the 2D
+scene~$V$.
+However, after being refracted by the diffuser, not all light rays propagate to
+the physical camera sensor.
+To account for this we must introduce a crop such that the forward model becomes
+\begin{equation}
+	f(V) = \operatorname*{crop}(P * V).
+	\label{eqn:forward-model-crop}
+\end{equation}
+By inverting this crop and convolution forward model we can reconstruct the
+scene~$V$.
+
+In order to further analyze the forward model
+(Eq.~\ref{eqn:forward-model-crop}) we rewrite it in terms of matrix
+representations.
+We can represent 2D convolution of the scene~$V$ with point spread function~$P$
+as multiplication of the vectorized scene~$\mathbf{v}\in\mathbb{R}^{h_v w_v}$
+by a circulant matrix~$\mathbf{P}\in\mathbb{R}^{h_c w_c\times h_v w_v}$.
+Cropping can similarly be represented by a
+matrix~$\mathbf{C}\in\mathbb{R}^{h_c w_c \times h_c w_c}$, since cropping is an
+affine transformation.
+The forward model operating on the vectorized scene~$\mathbf{v}$ then becomes
+\begin{equation}
+	f(\mathbf{v}) = \mathbf{C}\mathbf{P}\mathbf{v} \equiv \mathbf{A}\mathbf{v}
+	\label{eqn:forward-model-vectorized}
+\end{equation}
+where we introduced~$\mathbf{A} = \mathbf{C}\mathbf{P}$ as the parametrized
+forward model.
+By first finding the forward model matrix~$\mathbf{A}$ via a calibration step
+we can then reconstruct any scene~$\mathbf{v}$ by solving an inverse problem.
+
+Instead of solving the inverse problem directly, we find the squared error
+minimizer of the vectorized forward model
+(Eq.~\ref{eqn:forward-model-vectorized}) as the solution
+\begin{equation}
+	\mathbf{v}^* = \argmin_\mathbf{v}\frac{1}{2}{\lVert\mathbf{A}\mathbf{v} - \mathbf{B}\rVert}^2
+	\label{eqn:forward-model-objective}
+\end{equation}
+to a convex optimization problem.
+In this project I used two optimization methods to reconstruct the vectorized
+2D scene~$\mathbf{v}$ from raw sensor data~$\mathbf{B}$ captured with
+DiffuserCam by optimizing the forward model objective
+(Eq.~\ref{eqn:forward-model-objective}).
 The first optimization method is gradient descent with FISTA\@.
+It can be shown~\cite{biscarrat2018diffuseralgo} that the gradient of the
+forward model objective (Eq.~\ref{eqn:forward-model-objective}) is
+\begin{equation}
+	\nabla_\mathbf{v}g(\mathbf{v}) = \mathbf{A}^H(\mathbf{A}\mathbf{v} - \mathbf{B})
+	\label{eqn:forward-objective-gradient}
+\end{equation}
+where~$\mathbf{A}^H$ is the conjugate transpose of~$A$.
+The conjugate transpose~$\mathbf{A}^H$ further decomposes into
+\begin{equation}
+	\mathbf{A}^H = \mathbf{F}^{-1}{\operatorname*{diag}(\mathbf{F}\mathbf{P})}^*\mathbf{F}\mathbf{C}^H
+	\label{eqn:forward-model-conjugate-transpose}
+\end{equation}
+where~$\mathbf{F}$ is a matrix representation of a Fourier transform, and
+adjoint of cropping~$\mathbf{C}^H$ is zero
+padding~\cite{biscarrat2018diffuseralgo}.
+Hence the adjoint of the forward model~$\mathbf{A}$ is equivalent to first
+transforming the padded input to Fourier space with~$\mathbf{F}$, performing
+pointwise multiplication (multiplication with a diagonal matrix), and then
+inverting back to the spatial domain with~$\mathbf{F}^{-1}$.
+FISTA uses the gradient (Eq.~\ref{eqn:forward-objective-gradient}) to perform
+an accelerated projected gradient descent~\cite{beck2009fast}.
 
-\begin{itemize}
-	\item Description of Alternating Direction Method of Multipliers
-	      (ADMM).
-\end{itemize}
+I compared FISTA to alternating direction method of multipliers (ADMM)~\cite{}
+as an alternative optimization method to reconstruct the image by minimizing
+the forward model objective (Eq.~\ref{eqn:forward-model-objective}).
 
 
 \section{Experimental Setup}
 
-I converted a PiCam V2 to build my DiffuserCam.
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/experimental-setup}
+	\caption{\label{fig:experimental-setup}
+		The experimental setup used to conduct calibration and collect images.
+		I used the power supply (bottom) to adjust the brightness of the LED in order to prevent image saturation.}
+\end{figure*}
+
+
+\noindent I converted a PiCam V2 to build my DiffuserCam.
 I had to remove the lens, since DiffuserCam is a lensless camera.
 Furthermore I had to remove the IR filter and plastic housing for the camera
 from the sensor (Fig.~\ref{fig:board-filter-sensor}).
@@ -105,7 +222,7 @@ I instead used cardboard as a separating material to place the diffuser at the
 correct 2mm focal length from the sensor.
 
 I determined the focal length by analyzing the full width at half maximum
-(FWHM) of the autorcorrelation of the recorded point spread function (PSF).
+(FWHM) of the autocorrelation of the recorded point spread function (PSF).
 
 I used a cement mixing tray (Fig.~\ref{fig:experimental-setup}) to provide
 a dark environment for calibrating the DiffuserCam.
@@ -121,17 +238,6 @@ the reconstruction optimization.
 I used the same experimental setup for taking photos of objects to reconstruct.
 When reconstructing objects displayed on my phone I adjusted the PiCam exposure
 time in order to prevent pixel saturation.
-
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=1.0\linewidth]{images/experimental-setup}
-	\caption{\label{fig:experimental-setup}
-		The experimental setup used to conduct calibration and collect images.
-		I used the power supply (bottom) to adjust the brightness of the LED in order to prevent image saturation.}
-
-\end{figure*}
-
 
 
 \begin{figure}[t]
@@ -151,7 +257,7 @@ time in order to prevent pixel saturation.
 	\item I computed the autocorrelation of the camera setup's PSF
 	      with~\num{2}mm thickness cardboard separating material
 	      (Fig.~\ref{fig:psf-autocorrelation-2mm-spacing}).
-	      I first normalized the PSF~$X\in\mathbb{R}^{H\times W}$ by
+	      I first normalized the PSF~$X\in\mathbb{R}^{h\times w}$ by
 	      subtracting the mean pixel value~$\overline{X}$ and dividing by the standard
 	      deviation~$\sigma$ giving
 	      \begin{equation}
